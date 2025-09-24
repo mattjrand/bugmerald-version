@@ -13,6 +13,9 @@
 *.8bpp
 *.gbapal
 *.lz
+*.smol
+*.fastSmol
+*.smolTM
 *.rl
 *.latfont
 *.hwjpnfont
@@ -38,6 +41,8 @@ prefabs.json
 *.diff
 *.sym
 *.js
+/pokeemerald-*.png
 src/data/map_group_count.h
+include/constants/heal_locations.h
 tools/trainerproc/trainerproc
 README.md
