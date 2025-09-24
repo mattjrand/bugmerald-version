@@ -504,6 +504,7 @@ BattleScript_EffectAttackUpUserAlly_End:
 	goto BattleScript_MoveEnd
 BattleScript_EffectAttackUpUserAlly_TryAlly_:
 	jumpifblockedbysoundproof BS_ATTACKER_PARTNER, BattleScript_EffectAttackUpUserAlly_TryAllyBlocked
+	jumpifblockedbysoundproof BS_ATTACKER_PARTNER, BattleScript_EffectAttackUpUserAlly_TryAllyBlocked
 	setstatchanger STAT_ATK, 1, FALSE
 	statbuffchange BS_TARGET, STAT_CHANGE_ALLOW_PTR, BattleScript_EffectAttackUpUserAlly_End
 	jumpifbyte CMP_NOT_EQUAL, cMULTISTRING_CHOOSER, B_MSG_STAT_WONT_INCREASE, BattleScript_EffectAttackUpUserAlly_AllyString
@@ -886,6 +887,7 @@ BattleScript_EffectTarShot::
 	printfromtable gStatDownStringIds
 	waitmessage B_WAIT_TIME_LONG
 BattleScript_TryTarShot:
+	trytarshot BattleScript_MoveEnd
 	trytarshot BattleScript_MoveEnd
 	printstring STRINGID_PKMNBECAMEWEAKERTOFIRE
 	waitmessage B_WAIT_TIME_LONG
@@ -5260,11 +5262,14 @@ BattleScript_LocalTwoTrainersDefeated::
 	printstring STRINGID_TWOENEMIESDEFEATED
 BattleScript_LocalBattleWonLoseTexts::
 	trainerslidein BS_OPPONENT1
+	trainerslidein BS_OPPONENT1
 	waitstate
 	printstring STRINGID_TRAINER1LOSETEXT
 	jumpifnotbattletype BATTLE_TYPE_TWO_OPPONENTS, BattleScript_LocalBattleWonReward
 	trainerslideout BS_OPPONENT1
+	trainerslideout BS_OPPONENT1
 	waitstate
+	trainerslidein BS_OPPONENT2
 	trainerslidein BS_OPPONENT2
 	waitstate
 	printstring STRINGID_TRAINER2LOSETEXT
@@ -5318,13 +5323,16 @@ BattleScript_LocalBattleLostPrintTrainersWinText::
 	returnopponentmon2toball
 	waitstate
 	trainerslidein BS_OPPONENT1
+	trainerslidein BS_OPPONENT1
 	waitstate
 	printstring STRINGID_TRAINER1WINTEXT
 	jumpifbattletype BATTLE_TYPE_TOWER_LINK_MULTI, BattleScript_LocalBattleLostDoTrainer2WinText
 	jumpifnotbattletype BATTLE_TYPE_TWO_OPPONENTS, BattleScript_LocalBattleLostEnd_
 BattleScript_LocalBattleLostDoTrainer2WinText::
 	trainerslideout BS_OPPONENT1
+	trainerslideout BS_OPPONENT1
 	waitstate
+	trainerslidein BS_OPPONENT2
 	trainerslidein BS_OPPONENT2
 	waitstate
 	printstring STRINGID_TRAINER2WINTEXT
@@ -5337,10 +5345,13 @@ BattleScript_FrontierLinkBattleLost::
 	returnopponentmon2toball
 	waitstate
 	trainerslidein BS_OPPONENT1
+	trainerslidein BS_OPPONENT1
 	waitstate
 	printstring STRINGID_TRAINER1WINTEXT
 	trainerslideout BS_OPPONENT1
+	trainerslideout BS_OPPONENT1
 	waitstate
+	trainerslidein BS_OPPONENT2
 	trainerslidein BS_OPPONENT2
 	waitstate
 	printstring STRINGID_TRAINER2WINTEXT
@@ -5365,10 +5376,13 @@ BattleScript_TowerLinkBattleWon::
 	printstring STRINGID_BATTLEEND
 	waitmessage B_WAIT_TIME_LONG
 	trainerslidein BS_OPPONENT1
+	trainerslidein BS_OPPONENT1
 	waitstate
 	printstring STRINGID_TRAINER1LOSETEXT
 	trainerslideout BS_OPPONENT1
+	trainerslideout BS_OPPONENT1
 	waitstate
+	trainerslidein BS_OPPONENT2
 	trainerslidein BS_OPPONENT2
 	waitstate
 	printstring STRINGID_TRAINER2LOSETEXT
@@ -5387,11 +5401,14 @@ BattleScript_FrontierTrainerBattleWon_TwoDefeated:
 	printstring STRINGID_TWOENEMIESDEFEATED
 BattleScript_FrontierTrainerBattleWon_LoseTexts:
 	trainerslidein BS_OPPONENT1
+	trainerslidein BS_OPPONENT1
 	waitstate
 	printstring STRINGID_TRAINER1LOSETEXT
 	jumpifnotbattletype BATTLE_TYPE_TWO_OPPONENTS, BattleScript_TryPickUpItems
 	trainerslideout BS_OPPONENT1
+	trainerslideout BS_OPPONENT1
 	waitstate
+	trainerslidein BS_OPPONENT2
 	trainerslidein BS_OPPONENT2
 	waitstate
 	printstring STRINGID_TRAINER2LOSETEXT

@@ -1205,18 +1205,33 @@ void PrepareStringBattle(enum StringID stringId, u32 battler)
         SET_STATCHANGER(STAT_SPEED, 1, FALSE);
     }
 
-    else if (battlerAbility == ABILITY_SHOCK_THREADS && CompareStat(gBattlerTarget, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
+    else if 
+    ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH) &&
+    (battlerAbility == ABILITY_SHOCK_THREADS && targetAbility != ABILITY_SHOCK_THREADS))
     {
         BattleScriptPushCursorAndCallback(BattleScript_ShockThreadsActivates);
-                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
+                
+                gBattlerAbility = battlerAbility;
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 16;
                 if (gBattleMoveDamage == 0)
                         gBattleMoveDamage = 1;
     }
 
+    else if 
+    ((stringId == STRINGID_DEFENDERSSTATFELL || stringId == STRINGID_PKMNCUTSATTACKWITH) &&
+    (battlerAbility == ABILITY_SHOCK_THREADS && targetAbility != ABILITY_SHOCK_THREADS))
+    {
+        BattleScriptPushCursorAndCallback(BattleScript_ShockThreadsActivates);
+                
+                gBattlerAbility = battlerAbility;
+                gBattleMoveDamage = GetNonDynamaxMaxHP(gBattlerTarget) / 16;
+                if (gBattleMoveDamage == 0)
+                        gBattleMoveDamage = 1;
+    }
     else if (battlerAbility == ABILITY_SHOCK_THREADS && CompareStat(gBattlerTarget, STAT_SPEED, MAX_STAT_STAGE, CMP_LESS_THAN))
     {
         BattleScriptPushCursorAndCallback(BattleScript_ShockThreadsActivates);
-                gBattleMoveDamage = GetNonDynamaxMaxHP(battler) / 16;
+                gBattleMoveDamage = GetNonDynqamaxMaxHP(battler) / 16;
                 if (gBattleMoveDamage == 0)
                         gBattleMoveDamage = 1;
     }
@@ -3632,15 +3647,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_SHORT_FUSE:
-            if (!gSpecialStatuses[battler].switchInAbilityDone)
-            {
-                gBattleCommunication[MULTISTRING_CHOOSER] = B_MSG_SWITCHIN_SHORTFUSE;
-                gSpecialStatuses[battler].switchInAbilityDone = TRUE;
-                BattleScriptPushCursorAndCallback(BattleScript_ShortFuseActivates);
-                effect++;
-            }
-            break;
         case ABILITY_MOLD_BREAKER:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
@@ -4175,11 +4181,10 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        case ABILITY_EMBODY_ASPECT_TEAL:
-        case ABILITY_EMBODY_ASPECT_HEARTHFLAME:
-        case ABILITY_EMBODY_ASPECT_WELLSPRING:
-        case ABILITY_EMBODY_ASPECT_CORNERSTONE:
-
+        case ABILITY_EMBODY_ASPECT_TEAL_MASK:
+        case ABILITY_EMBODY_ASPECT_HEARTHFLAME_MASK:
+        case ABILITY_EMBODY_ASPECT_WELLSPRING_MASK:
+        case ABILITY_EMBODY_ASPECT_CORNERSTONE_MASK:
             if (!gSpecialStatuses[battler].switchInAbilityDone)
             {
                 u32 stat;
@@ -4796,6 +4801,34 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
+        case ABILITY_SHORT_FUSE:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && gBattlerAttacker != gBattlerTarget
+             && TARGET_TURN_DAMAGED
+             && IsBattlerAlive(battler)
+             && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                gEffectBattler = battler;
+                SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                effect++;
+            }
+            break;
+        case ABILITY_SHORT_FUSE:
+            if (!(gMoveResultFlags & MOVE_RESULT_NO_EFFECT)
+             && gBattlerAttacker != gBattlerTarget
+             && TARGET_TURN_DAMAGED
+             && IsBattlerAlive(battler)
+             && CompareStat(battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                gEffectBattler = battler;
+                SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_TargetAbilityStatRaiseRet;
+                effect++;
+            }
+            break;
         case ABILITY_BERSERK:
             if (IsBattlerTurnDamaged(battler)
              && IsBattlerAlive(battler)
@@ -4829,16 +4862,6 @@ u32 AbilityBattleEffects(u32 caseID, u32 battler, u32 ability, u32 special, u32 
                 effect++;
             }
             break;
-        // case ABILITY_INSPIRE:
-        //     if (gBattleMons[battler].hp == 0)
-        //     && IsBattlerAlive(BATTLE_PARTNER(battler))
-        //     && (CompareStat(BATTLE_PARTNER(battler), STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN) || CompareStat(BATTLE_PARTNER(battler), STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
-        //     {
-        //         BattleScriptPushCursor();
-        //         gBattlescriptCurrInstr = BattleScript_InspireActivates;
-        //         effect++;
-        //     }
-        //     break;
         case ABILITY_WEAK_ARMOR:
             if (IsBattlerTurnDamaged(battler)
              && IsBattlerAlive(battler)

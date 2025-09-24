@@ -1133,7 +1133,7 @@ static void Cmd_attackcanceler(void)
     && GetBattlerAbility(gBattlerAttacker) == ABILITY_FERMATA
     && IsMoveAffectedByFermata(gCurrentMove, gBattlerAttacker)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
-    && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
+    && GetActiveGimmick(gBattlerAttacker) != GIMMICK_Z_MOVE)
     {
         gSpecialStatuses[gBattlerAttacker].fermataState = FERMATA_1ST_HIT;
         gMultiHitCounter = 2;
@@ -1144,7 +1144,7 @@ static void Cmd_attackcanceler(void)
     && GetBattlerAbility(BATTLE_PARTNER(gBattlerAttacker)) == ABILITY_FERMATA
     && IsMoveAffectedByFermata(gCurrentMove, gBattlerAttacker)
     && !(gAbsentBattlerFlags & gBitTable[gBattlerTarget])
-    && gBattleStruct->zmove.toBeUsed[gBattlerAttacker] == MOVE_NONE)
+    && GetActiveGimmick(gBattlerAttacker) != GIMMICK_Z_MOVE)
     {
         gSpecialStatuses[gBattlerAttacker].fermataState = FERMATA_1ST_HIT;
         gMultiHitCounter = 2;
@@ -1233,10 +1233,10 @@ static void Cmd_attackcanceler(void)
 
     if (GetBattlerAbility(gBattlerTarget) == ABILITY_REFLECTIVE_SCALES
              && gMovesInfo[gCurrentMove].magicCoatAffected
-             && !gProtectStructs[gBattlerAttacker].usesBouncedMove
+             && !gBattleStruct->bouncedMoveIsUsed
              && GetBattlerTurnOrderNum(gBattlerAttacker) > GetBattlerTurnOrderNum(gBattlerTarget))
     {
-        gProtectStructs[gBattlerTarget].usesBouncedMove = TRUE;
+        gBattleStruct->bouncedMoveIsUsed = TRUE;
         gBattleCommunication[MULTISTRING_CHOOSER] = 1;
         // Edge case for bouncing a powder move against a grass type pokemon.
         SetAtkCancellerForCalledMove();
@@ -1249,7 +1249,6 @@ static void Cmd_attackcanceler(void)
     else if (GetBattlerAbility(gBattlerTarget) == ABILITY_MAGIC_BOUNCE
              && gMovesInfo[gCurrentMove].magicCoatAffected
              && !gBattleStruct->bouncedMoveIsUsed)
-
     {
         u32 battler = gBattlerTarget;
 
@@ -9056,12 +9055,6 @@ static void Cmd_setgravity(void)
     {
         gBattlescriptCurrInstr = cmd->failInstr;
     }
-    if (gBattlerAbility == ABILITY_TRAP_MASTER)
-    {
-        gFieldStatuses |= STATUS_FIELD_GRAVITY;
-        gFieldTimers.gravityTimer = 8;
-        gBattlescriptCurrInstr = cmd->nextInstr;        
-    }
     else
     {
         gFieldStatuses |= STATUS_FIELD_GRAVITY;
@@ -9784,6 +9777,8 @@ u32 IsFlowerVeilProtected(u32 battler)
         return 0;
 }
 
+
+
 u32 IsLeafGuardProtected(u32 battler, u32 ability)
 {
     if (IsBattlerWeatherAffected(battler, B_WEATHER_SUN))
@@ -10108,15 +10103,12 @@ static void Cmd_various(void)
     case VARIOUS_TRY_FAIRY_LOCK:
     {
         VARIOUS_ARGS(const u8 *failInstr);
+
+        u16 battlerAbility = GetBattlerAbility(battler);
+
         if (gFieldStatuses & STATUS_FIELD_FAIRY_LOCK)
         {
             gBattlescriptCurrInstr = cmd->failInstr;
-        }
-        if (gBattlerAbility == ABILITY_TRAP_MASTER)
-        {
-            gFieldStatuses |= STATUS_FIELD_FAIRY_LOCK;
-            gFieldTimers.fairyLockTimer = 4;
-            gBattlescriptCurrInstr = cmd->nextInstr;
         }
         else
         {
@@ -10734,6 +10726,31 @@ static void Cmd_various(void)
         }
         gBattleStruct->soulheartBattlerId = 0;
         break;
+    }
+    case VARIOUS_TRY_ACTIVATE_INSPIRE:
+    {
+        VARIOUS_ARGS();
+        gBattlerAbility = BATTLE_PARTNER(battler);
+        i = GetBattlerAbility(gBattlerAbility);
+        if (!IsBattlerAlive(gBattlerAbility)
+        && (i == ABILITY_INSPIRE)
+        && IsBattlerAlive(gBattleScripting.battler)
+        && !NoAliveMonsForEitherParty()
+        && CompareStat(gBattleScripting.battler, STAT_ATK, MAX_STAT_STAGE, CMP_LESS_THAN)
+        && CompareStat(gBattleScripting.battler, STAT_SPATK, MAX_STAT_STAGE, CMP_LESS_THAN))
+            {
+                SET_STATCHANGER(STAT_SPATK, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_SPATK);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ScriptingAbilityStatRaise;
+                return;
+                SET_STATCHANGER(STAT_ATK, 1, FALSE);
+                PREPARE_STAT_BUFFER(gBattleTextBuff1, STAT_ATK);
+                BattleScriptPushCursor();
+                gBattlescriptCurrInstr = BattleScript_ScriptingAbilityStatRaise;
+                return;
+            }
+               
     }
     case VARIOUS_TRY_ACTIVATE_FELL_STINGER:
     {
@@ -11765,20 +11782,6 @@ static void Cmd_various(void)
         {
             if (!(gBattleMons[battler].status2 & STATUS2_ESCAPE_PREVENTION))
                 gDisableStructs[battler].noRetreat = TRUE;
-            gBattlescriptCurrInstr = cmd->nextInstr;
-        }
-        return;
-    }
-    case VARIOUS_TRY_TAR_SHOT:
-    {
-        VARIOUS_ARGS(const u8 *failInstr);
-        if (gDisableStructs[battler].tarShot)
-        {
-            gBattlescriptCurrInstr = cmd->failInstr;
-        }
-        else
-        {
-            gDisableStructs[battler].tarShot = TRUE;
             gBattlescriptCurrInstr = cmd->nextInstr;
         }
         return;

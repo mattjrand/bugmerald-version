@@ -261,6 +261,7 @@ BattleScript_ActionWallyThrow:
 	returnatktoball
 	waitstate
 	trainerslidein BS_PLAYER1
+	trainerslidein BS_PLAYER1
 	waitstate
 	printstring STRINGID_YOUTHROWABALLNOWRIGHT
 	waitmessage B_WAIT_TIME_LONG

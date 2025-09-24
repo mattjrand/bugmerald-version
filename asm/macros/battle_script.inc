@@ -511,7 +511,9 @@
 	.endm
 
 	.macro trainerslidein position:req
+	.macro trainerslidein position:req
 	.byte 0x53
+	.byte \position
 	.byte \position
 	.endm
 

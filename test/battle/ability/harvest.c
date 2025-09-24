@@ -118,6 +118,7 @@ SINGLE_BATTLE_TEST("Harvest doesn't restore a Berry when destroyed by Incinerate
     PASSES_RANDOMLY(1, 1, RNG_HARVEST);
     GIVEN {
         ASSUME(MoveHasAdditionalEffect(MOVE_INCINERATE, MOVE_EFFECT_INCINERATE));
+        ASSUME(MoveHasAdditionalEffect(MOVE_INCINERATE, MOVE_EFFECT_INCINERATE));
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_EXEGGUTOR) { Ability(ABILITY_HARVEST); Item(ITEM_SITRUS_BERRY); }
     } WHEN {
@@ -153,6 +154,7 @@ SINGLE_BATTLE_TEST("Harvest doesn't restore a Berry when eaten by Bug Bite/Pluck
 {
     PASSES_RANDOMLY(1, 1, RNG_HARVEST);
     GIVEN {
+        ASSUME(MoveHasAdditionalEffect(MOVE_BUG_BITE, MOVE_EFFECT_BUG_BITE));
         ASSUME(MoveHasAdditionalEffect(MOVE_BUG_BITE, MOVE_EFFECT_BUG_BITE));
         PLAYER(SPECIES_WOBBUFFET);
         OPPONENT(SPECIES_EXEGGUTOR) { Ability(ABILITY_HARVEST); Item(ITEM_SITRUS_BERRY); }
